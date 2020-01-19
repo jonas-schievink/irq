@@ -1,6 +1,6 @@
 [package]
 name = "irq"
-version = "0.0.0"
+version = "0.1.0"
 authors = ["Jonas Schievink <jonasschievink@gmail.com>"]
 edition = "2018"
 description = "Scoped interrupt handlers and interrupt locks for sharing data"
@@ -10,18 +10,6 @@ keywords = ["interrupt", "scoped", "handler", "handling"]
 categories = ["embedded", "no-std"]
 readme = "README.md"
 license = "0BSD"
-
-[badges]
-travis-ci = { repository = "jonas-schievink/irq" }
-maintenance = { status = "actively-developed" }
-
-# Dependencies are intentionally kept light since running compile-fail tests or Miri tests requires
-# `cargo clean`ing out old compilation artifacts.
-
-[dev-dependencies]
-once_cell = "1.3.0"
-cortex-m-rt = "0.6.11"
-mock-pac = { path = "mock-pac" }
 
 # cargo-release configuration
 [package.metadata.release]
@@ -53,6 +41,18 @@ replace = 'irq = "{{version}}"'
 file    = "src/lib.rs"
 search  = "https://docs.rs/irq/[a-z0-9\\.-]+"
 replace = "https://docs.rs/irq/{{version}}"
+
+[badges]
+travis-ci = { repository = "jonas-schievink/irq" }
+maintenance = { status = "actively-developed" }
+
+# Dependencies are intentionally kept light since running compile-fail tests or Miri tests requires
+# `cargo clean`ing out old compilation artifacts.
+
+[dev-dependencies]
+once_cell = "1.3.0"
+cortex-m-rt = "0.6.11"
+mock-pac = { path = "mock-pac" }
 
 [workspace]
 members = ["mock-pac"]
