@@ -1,4 +1,4 @@
-# **I**nterrupt **R**e**q**uest utilities
+# IRQ – Utilities for writing Interrupt Handlers
 
 [![crates.io](https://img.shields.io/crates/v/irq.svg)](https://crates.io/crates/irq)
 [![docs.rs](https://docs.rs/irq/badge.svg)](https://docs.rs/irq/)
