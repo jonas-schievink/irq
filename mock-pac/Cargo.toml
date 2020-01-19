@@ -1,0 +1,10 @@
+[package]
+name = "mock-pac"
+version = "0.1.0"
+authors = ["Jonas Schievink <jonasschievink@gmail.com>"]
+edition = "2018"
+publish = false
+
+[dependencies]
+bare-metal = "0.2.5"
+cortex-m-rt = { version = "0.6.11", features = ["device"] }
