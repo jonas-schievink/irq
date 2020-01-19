@@ -1,10 +1,10 @@
-# **I**nterrupt **R**e**q**uest
+# **I**nterrupt **R**e**q**uest utilities
 
 [![crates.io](https://img.shields.io/crates/v/irq.svg)](https://crates.io/crates/irq)
 [![docs.rs](https://docs.rs/irq/badge.svg)](https://docs.rs/irq/)
 [![Build Status](https://travis-ci.org/jonas-schievink/irq.svg?branch=master)](https://travis-ci.org/jonas-schievink/irq)
 
-TODO: Briefly describe the crate here (eg. "This crate provides ...").
+This crate provides utilities for handling interrupts on embedded devices.
 
 Please refer to the [changelog](CHANGELOG.md) to see what changed in the last
 releases.
@@ -13,7 +13,8 @@ releases.
 
 * Dynamically and atomically registered, zero-allocation interrupt handlers.
 * Allows moving data into interrupt handlers, and sharing data between handlers.
-* Completely platform agnostic, does not require atomic swap operations (works on eg. thumbv6 targets).
+* Completely platform agnostic, does not require atomic swap operations (works
+  on eg. thumbv6 targets).
 
 ## Usage
 
@@ -25,7 +26,53 @@ irq = "0.1.0"
 ```
 
 Check the [API Documentation](https://docs.rs/irq/) for how to use the
-crate's functionality.
+crate's functionality. A small example showcasing the Scoped Interrupts API is
+provided below:
+
+```rust
+use irq::{scoped_interrupts, handler, scope};
+
+// This macro is invoked by `scoped_interrupts!` to declare an interrupt
+// handler. It needs to expand to code that makes `$f` act as an interrupt
+// handler for interrupt `$name`.
+macro_rules! hook {
+    (
+        interrupt = $name:ident;
+        function = $f:item;
+    ) => {
+        #[interrupt]
+        $f
+    };
+}
+
+// Hook `INT0` and `INT1` using the `hook!` macro above.
+scoped_interrupts! {
+    enum Interrupt {
+        INT0,
+        INT1,
+    }
+
+    use mock_pac::interrupt;
+
+    with hook!(...)
+}
+
+fn main() {
+    // Define data to be used (via move or borrow) by the interrupt handlers.
+    let mut i = 0;
+    let shared = [0, 1, 2];
+
+    // Define handlers using the `handler!` macro.
+    handler!(int0 = || i += shared[1]);
+    handler!(int1 = || println!("{}", shared[2]));
+
+    // Create a scope and register the handlers.
+    scope(|scope| {
+        scope.register(Interrupt::INT0, int0);
+        scope.register(Interrupt::INT1, int1);
+    });
+}
+```
 
 ## Rust version support
 
