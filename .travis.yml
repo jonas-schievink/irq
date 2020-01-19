@@ -12,8 +12,13 @@ env:
     - CARGO_INCREMENTAL=0  # decrease size of `target` to make the cache smaller
   matrix:
     - FEATURES=""  # default configuration
+before_script:
+  - rustup target add thumbv6m-none-eabi
 script:
   - cargo test --all $FEATURES
+
+  # Ensure we can build for targets without atomic swap instructions.
+  - cargo build --target thumbv6m-none-eabi
 notifications:
   email:
     on_success: never
