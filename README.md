@@ -76,8 +76,7 @@ fn main() {
 
 ## Rust version support
 
-This crate supports the 3 latest stable Rust releases. Bumping the minimum
-supported Rust version (MSRV) is not considered a breaking change as long as
-these 3 versions are still supported.
+This crate targets stable Rust. No guarantees are made beyond that, so the
+minimum supported version might be bumped as needed.
 
 The MSRV is also explicitly tested against in [.travis.yml](.travis.yml).
