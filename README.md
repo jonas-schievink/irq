@@ -70,6 +70,9 @@ fn main() {
     scope(|scope| {
         scope.register(Interrupt::INT0, int0);
         scope.register(Interrupt::INT1, int1);
+
+        // The interrupts stay registered for the duration of this closure.
+        // This is a good place for the application's idle loop.
     });
 }
 ```
