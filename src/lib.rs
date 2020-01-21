@@ -19,29 +19,16 @@
 //!
 //! ```
 //! use irq::{scoped_interrupts, handler, scope};
+//! use mock_pac::interrupt;
 //!
-//! // This macro is invoked by `scoped_interrupts!` to declare an interrupt handler. It needs to
-//! // expand to code that makes `$f` act as an interrupt handler for interrupt `$name`.
-//! macro_rules! hook {
-//!     (
-//!         interrupt = $name:ident;
-//!         function = $f:item;
-//!     ) => {
-//!         #[interrupt]
-//!         $f
-//!     };
-//! }
-//!
-//! // Hook `INT0` and `INT1` using the `hook!` macro above.
+//! // Hook `INT0` and `INT1` using the `#[interrupt]` attribute imported above.
 //! scoped_interrupts! {
 //!     enum Interrupt {
 //!         INT0,
 //!         INT1,
 //!     }
 //!
-//!     use mock_pac::interrupt;
-//!
-//!     with hook!(...)
+//!     use #[interrupt];
 //! }
 //!
 //! fn main() {
@@ -99,26 +86,14 @@ use core::sync::atomic::{AtomicUsize, Ordering};
 ///
 /// ```
 /// # use irq::scoped_interrupts;
+/// # use mock_pac::interrupt;
 /// #
-/// // A macro taking `interrupt` and `function` arguments has to be provided:
-/// macro_rules! hook {
-///     (
-///         interrupt = $name:ident;
-///         function = $f:item;
-///     ) => {
-///         #[interrupt]
-///         $f
-///     };
-/// }
-///
 /// scoped_interrupts! {
 ///     enum Interrupt {
 ///         INT0,
 ///     }
 ///
-///     use mock_pac::interrupt;
-///
-///     with hook!(...)
+///     use #[interrupt];
 /// }
 ///
 /// # fn main() {}  // macro must be called outside a function
@@ -140,14 +115,10 @@ macro_rules! scoped_interrupts {
             $(,)?
         }
 
-        $(
-            use $p:path;
-        )*
-
-        with $hook_macro:ident!(...)
+        use #[$hook_attr:meta];
     ) => {
         // Step 1: Declare an Actual Enum like that.
-        $( #[$enum_attr:meta] )*
+        $( #[$enum_attr] )*
         $v enum $name {
             $(
                 $interrupt,
@@ -155,52 +126,38 @@ macro_rules! scoped_interrupts {
         }
 
         // Step 2: Hook all the interrupts and put veneers in place.
-        // This needs to be a public module or the interrupt handlers don't end up in the binary.
-        // cc https://github.com/rust-lang/rust/issues/68322
-        pub mod scoped_interrupt_hooks {
-            // Extra module needed to avoid name collisions.
-            pub(crate) mod statics {
-                $(
-                    #[allow(bad_style)]
-                    pub(crate) static $interrupt: $crate::HandlerAddr = $crate::HandlerAddr::new();
-                )+
-            }
 
-            // Import dependencies / interrupt macros *once*.
+        // Extra module needed to avoid name collisions.
+        pub(crate) mod statics {
             $(
-                use $p;
-            )*
-
-            // Now invoke the provided macro on each veneer.
-            $(
-                $hook_macro! {
-                    interrupt = $interrupt;
-                    function =
-
-                    #[allow(bad_style, dead_code)]
-                    unsafe fn $interrupt() {
-                        let handler = self::statics::$interrupt.load();
-                        if handler == 0 {
-                            // XXX this might be expensive
-                            panic!(concat!(
-                                "no handler registered for ",
-                                ::core::stringify!($interrupt)
-                            ));
-                        } else {
-                            let handler = handler as *mut $crate::Handler<'_>;
-
-                            // Soundness:
-                            // - Relies on the user-provided interface to manage the handler lifetime
-                            //   (which is dangling here).
-                            // - Relies on interrupts not being reentrant
-                            (*handler).invoke();
-                        }
-                    }
-
-                    ;
-                }
+                #[allow(bad_style)]
+                pub(crate) static $interrupt: $crate::HandlerAddr = $crate::HandlerAddr::new();
             )+
         }
+
+        // Now invoke the provided macro on each veneer.
+        $(
+            #[$hook_attr]
+            #[allow(bad_style, dead_code)]
+            unsafe fn $interrupt() {
+                let handler = self::statics::$interrupt.load();
+                if handler == 0 {
+                    // XXX this might be expensive
+                    panic!(concat!(
+                        "no handler registered for ",
+                        ::core::stringify!($interrupt)
+                    ));
+                } else {
+                    let handler = handler as *mut $crate::Handler<'_>;
+
+                    // Soundness:
+                    // - Relies on the user-provided interface to manage the handler lifetime
+                    //   (which is dangling here).
+                    // - Relies on interrupts not being reentrant
+                    (*handler).invoke();
+                }
+            }
+        )+
 
         // Step 3: Implement the `Interrupt` trait.
         unsafe impl $crate::Interrupt for $name {
@@ -208,7 +165,7 @@ macro_rules! scoped_interrupts {
                 match self {
                     $(
                         Self::$interrupt => {
-                            self::scoped_interrupt_hooks::statics::$interrupt.store(handler as *mut _ as usize);
+                            self::statics::$interrupt.store(handler as *mut _ as usize);
                         }
                     )+
                 }
@@ -218,7 +175,7 @@ macro_rules! scoped_interrupts {
                 // Safety: We store 0, which disables the interrupt, which is always safe.
                 unsafe {
                     $(
-                        self::scoped_interrupt_hooks::statics::$interrupt.store(0);
+                        self::statics::$interrupt.store(0);
                     )+
                 }
             }
@@ -401,37 +358,13 @@ mod tests {
     use super::*;
     use std::panic::catch_unwind;
 
-    // We need a pretty cursed contortion here since we want to raise interrupts at will. This
-    // could also be done with an actual proc. macro attribute, but that is a lot of work.
-
-    macro_rules! export_name {
-        ( $name:expr; $i:item ) => {
-            #[export_name = $name]
-            $i
-        }
-    }
-
-    macro_rules! hook {
-        (
-            interrupt = $interrupt:ident;
-            function = $f:item;
-        ) => {
-            export_name!(stringify!($interrupt); $f);
-        };
-    }
-
     scoped_interrupts! {
         enum Interrupt {
             Int0,
             Int1,
         }
 
-        with hook!(...)
-    }
-
-    extern "Rust" {
-        fn Int0();
-        fn Int1();
+        use #[no_mangle];
     }
 
     struct Test {}

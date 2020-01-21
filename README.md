@@ -31,30 +31,16 @@ provided below:
 
 ```rust
 use irq::{scoped_interrupts, handler, scope};
+use mock_pac::interrupt;
 
-// This macro is invoked by `scoped_interrupts!` to declare an interrupt
-// handler. It needs to expand to code that makes `$f` act as an interrupt
-// handler for interrupt `$name`.
-macro_rules! hook {
-    (
-        interrupt = $name:ident;
-        function = $f:item;
-    ) => {
-        #[interrupt]
-        $f
-    };
-}
-
-// Hook `INT0` and `INT1` using the `hook!` macro above.
+// Hook `INT0` and `INT1` using the `#[interrupt]` attribute imported above.
 scoped_interrupts! {
     enum Interrupt {
         INT0,
         INT1,
     }
 
-    use mock_pac::interrupt;
-
-    with hook!(...)
+    use #[interrupt];
 }
 
 fn main() {
