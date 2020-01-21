@@ -2,6 +2,10 @@
 
 ## Unreleased
 
+No changes.
+
+## [0.2.0 - 2020-01-21](https://github.com/jonas-schievink/irq/releases/tag/0.2.0)
+
 * Improve readme and documentation
 * Do not require a user-defined macro to work
 
