@@ -135,14 +135,14 @@ macro_rules! scoped_interrupts {
             )+
         }
 
-        // Now invoke the provided macro on each veneer.
+        // Now register veneers using the provided hook attribute.
         $(
             #[$hook_attr]
             #[allow(bad_style, dead_code)]
             unsafe fn $interrupt() {
                 let handler = self::statics::$interrupt.load();
                 if handler == 0 {
-                    // XXX this might be expensive
+                    // XXX this might be expensive in terms of binary size
                     panic!(concat!(
                         "no handler registered for ",
                         ::core::stringify!($interrupt)
@@ -160,6 +160,7 @@ macro_rules! scoped_interrupts {
         )+
 
         // Step 3: Implement the `Interrupt` trait.
+        // Safety: `deregister_all()` is correctly implemented by this macro.
         unsafe impl $crate::Interrupt for $name {
             unsafe fn register(self, handler: &mut $crate::Handler<'_>) {
                 match self {
@@ -208,7 +209,9 @@ macro_rules! handler {
 
 /// Creates a scope in which interrupt handlers using stack-local data can be registered.
 ///
-/// When this function returns, all interrupts will be deregistered again.
+/// When this function returns, all handlers will be deregistered again. Note that `scope` calls
+/// should not be nested, or all interrupt handlers will be deregistered as soon as the *inner* call
+/// returns.
 pub fn scope<'env, I, F, R>(f: F) -> R
 where
     I: Interrupt,
