@@ -282,7 +282,7 @@ impl<'a> Handler<'a> {
     #[inline(always)]
     pub fn new<F>(f: &'a mut F) -> Self
     where
-        F: FnMut(),
+        F: FnMut() + Send + 'a,
     {
         Self { f }
     }
