@@ -54,7 +54,7 @@
 //! [`PriorityLock`]: struct.PriorityLock.html
 //! [svd2rust]: https://github.com/rust-embedded/svd2rust
 
-#![doc(html_root_url = "https://docs.rs/irq/0.2.0")]
+#![doc(html_root_url = "https://docs.rs/irq/0.2.1")]
 // Deny a few warnings in doctests, since rustdoc `allow`s many warnings by default
 #![doc(test(attr(deny(unused_imports, unused_must_use))))]
 #![warn(missing_debug_implementations, rust_2018_idioms)]

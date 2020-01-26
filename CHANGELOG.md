@@ -2,6 +2,10 @@
 
 ## Unreleased
 
+No changes.
+
+## [0.2.1 - 2020-01-26](https://github.com/jonas-schievink/irq/releases/tag/v0.2.1)
+
 * Add a `Send` bound to `Handler::new`. This is a soundness fix.
 
 ## [0.2.0 - 2020-01-21](https://github.com/jonas-schievink/irq/releases/tag/v0.2.0)
