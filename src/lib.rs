@@ -85,9 +85,9 @@ use core::sync::atomic::{AtomicUsize, Ordering};
 /// interrupts that can be hooked using the `#[interrupt]` macro:
 ///
 /// ```
-/// # use irq::scoped_interrupts;
-/// # use mock_pac::interrupt;
-/// #
+/// use irq::scoped_interrupts;
+/// use mock_pac::interrupt;
+///
 /// scoped_interrupts! {
 ///     enum Interrupt {
 ///         INT0,
