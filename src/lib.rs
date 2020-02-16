@@ -44,7 +44,16 @@
 //!     scope(|scope| {
 //!         scope.register(Interrupt::INT0, int0);
 //!         scope.register(Interrupt::INT1, int1);
+//!
+//!         // The handlers stay registered as long as this closure executes.
+//!         // This is a good place for the application's main/idle loop.
+//!         loop {
+//!             // Do stuff.
+//! # break;
+//!         }
 //!     });
+//!
+//!     // Now all handlers are deregistered again.
 //! }
 //! ```
 //!
