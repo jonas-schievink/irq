@@ -2,7 +2,7 @@
 
 ## Unreleased
 
-No changes.
+* Slight documentation improvements.
 
 ## [0.2.1 - 2020-01-26](https://github.com/jonas-schievink/irq/releases/tag/v0.2.1)
 
