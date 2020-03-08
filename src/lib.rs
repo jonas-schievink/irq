@@ -151,17 +151,26 @@ macro_rules! scoped_interrupts {
             unsafe fn $interrupt() {
                 let handler = self::statics::$interrupt.load();
                 if handler == 0 {
-                    // XXX this might be expensive in terms of binary size
-                    panic!(concat!(
-                        "no handler registered for ",
-                        ::core::stringify!($interrupt)
-                    ));
+                    if cfg!(debug_assertions) {
+                        // Pay for a panic call when debug assertions are on. It is a bug when this
+                        // code is hit, so tell the user.
+                        panic!(concat!(
+                            "no handler registered for ",
+                            ::core::stringify!($interrupt)
+                        ));
+                    } else {
+                        // Without debug assertions, go into an infinite loop when no handler is
+                        // registered. This matches the behavior of cortex-m-rt's default handler.
+                        // We load from the static to defeat LLVM's loop optimizations to work
+                        // around https://github.com/rust-lang/rust/issues/28728.
+                        while self::statics::$interrupt.load() == 0 {}
+                    }
                 } else {
                     let handler = handler as *mut $crate::Handler<'_>;
 
                     // Soundness:
-                    // - Relies on the user-provided interface to manage the handler lifetime
-                    //   (which is dangling here).
+                    // - Relies on the user-facing API to manage the handler lifetime (which is
+                    //   dangling here).
                     // - Relies on interrupts not being reentrant
                     (*handler).invoke();
                 }
@@ -264,6 +273,7 @@ impl<'env, I: Interrupt> Scope<'env, I> {
     /// [`scope`]: fn.scope.html
     /// [`scoped_interrupts!`]: macro.scoped_interrupts.html
     /// [`handler!`]: macro.handler.html
+    #[inline]
     pub fn register(&self, interrupt: I, handler: &'env mut Handler<'env>) {
         unsafe {
             interrupt.register(handler);
@@ -346,6 +356,8 @@ impl fmt::Debug for HandlerAddr {
 ///
 /// This trait is unsafe to implement. Safely implementing it requires correctly implementing its
 /// methods. In particular, `deregister_all` must, in fact, deregister all registered handlers.
+///
+/// It is recommended to use [`scoped_interrupts!`] instead of implementing this trait by hand.
 ///
 /// [`scoped_interrupts!`]: macro.scoped_interrupts.html
 pub unsafe trait Interrupt {

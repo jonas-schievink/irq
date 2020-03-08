@@ -2,7 +2,8 @@
 
 ## Unreleased
 
-No changes.
+* Raising an interrupt that isn't registered now only panics in debug builds,
+  and goes into an infinite loop in release builds.
 
 ## [0.2.2 - 2020-02-16](https://github.com/jonas-schievink/irq/releases/tag/v0.2.2)
 
