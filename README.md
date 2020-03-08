@@ -22,7 +22,7 @@ Add an entry to your `Cargo.toml`:
 
 ```toml
 [dependencies]
-irq = "0.2.2"
+irq = "0.2.3"
 ```
 
 Check the [API Documentation](https://docs.rs/irq/) for how to use the
