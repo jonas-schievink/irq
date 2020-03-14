@@ -275,6 +275,8 @@ impl<'env, I: Interrupt> Scope<'env, I> {
     /// [`handler!`]: macro.handler.html
     #[inline]
     pub fn register(&self, interrupt: I, handler: &'env mut Handler<'env>) {
+        // CFAIL: `handler` must be taken by mutable reference, or the same handler could be
+        // registered for 2 different interrupts.
         unsafe {
             interrupt.register(handler);
         }
