@@ -1,0 +1,30 @@
+error[E0716]: temporary value dropped while borrowed
+  --> $DIR/handler-inside-scope.rs:19:9
+   |
+18 |     scope(|scope| {
+   |            ----- has type `&irq::Scope<'1, Interrupt>`
+19 |         handler!(int0 = move || i += 1);
+   |         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ creates a temporary which is freed while still in use
+20 |         scope.register(Interrupt::INT0, int0);
+   |         ------------------------------------- argument requires that borrow lasts for `'1`
+...
+26 |     });
+   |     - temporary value is freed at the end of this statement
+   |
+   = note: this error originates in a macro (in Nightly builds, run with -Z macro-backtrace for more info)
+
+error[E0597]: `closure` does not live long enough
+  --> $DIR/handler-inside-scope.rs:19:9
+   |
+18 |     scope(|scope| {
+   |            ----- has type `&irq::Scope<'1, Interrupt>`
+19 |         handler!(int0 = move || i += 1);
+   |         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+   |         |
+   |         borrowed value does not live long enough
+   |         argument requires that `closure` is borrowed for `'1`
+...
+26 |     });
+   |     - `closure` dropped here while still borrowed
+   |
+   = note: this error originates in a macro (in Nightly builds, run with -Z macro-backtrace for more info)

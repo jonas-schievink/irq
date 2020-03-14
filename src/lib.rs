@@ -253,7 +253,6 @@ where
 #[allow(missing_debug_implementations)]
 pub struct Scope<'env, I: Interrupt> {
     // Make `'env` invariant
-    // CFAIL ^
     _p: PhantomData<(I, &'env mut &'env ())>,
 }
 
@@ -275,8 +274,9 @@ impl<'env, I: Interrupt> Scope<'env, I> {
     /// [`handler!`]: macro.handler.html
     #[inline]
     pub fn register(&self, interrupt: I, handler: &'env mut Handler<'env>) {
-        // CFAIL: `handler` must be taken by mutable reference, or the same handler could be
+        // `handler` must be taken by mutable reference here, or the same handler could be
         // registered for 2 different interrupts.
+        // Its lifetime must also be forced to `'env` to indicate that it may flow into `self`.
         unsafe {
             interrupt.register(handler);
         }
@@ -462,7 +462,7 @@ mod tests {
             // (this is verbose, normally one would use `handler!`)
 
             scope(|scope| {
-                // CFAIL: non-'env closure or handler are unsound
+                // Non-'env handler would be unsound.
                 scope.register(Interrupt::Int0, &mut handler);
 
                 // Test that the handler is called when the interrupt is raised.
