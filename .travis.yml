@@ -3,7 +3,6 @@ rust:
   - 1.39.0
   - stable
   - nightly
-cache: cargo
 sudo: false
 env:
   global:
