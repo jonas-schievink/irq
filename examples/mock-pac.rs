@@ -13,7 +13,13 @@ scoped_interrupts! {
 
 fn main() {
     let mut i = 0;
-    handler!(int0 = move || i += 1);
+    handler!(
+        int0 = move || {
+            if i == 0 {
+                i = 1;
+            }
+        }
+    );
 
     scope(|scope| {
         scope.register(Interrupt::INT0, int0);

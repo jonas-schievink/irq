@@ -3,6 +3,8 @@
 //! This is required for safety since otherwise the handler could preempt itself and duplicate
 //! mutable references during the second invocation.
 
+#![allow(warnings)]
+
 use irq::{handler, scope, scoped_interrupts};
 use mock_pac::interrupt;
 

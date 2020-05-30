@@ -1,6 +1,8 @@
 //! Test that no handlers can be registered that are defined *inside* the scope they would be
 //! registered for.
 
+#![allow(warnings)]
+
 use irq::{handler, scope, scoped_interrupts};
 use mock_pac::interrupt;
 
