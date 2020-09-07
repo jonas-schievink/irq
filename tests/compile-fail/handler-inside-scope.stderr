@@ -2,7 +2,7 @@ error[E0716]: temporary value dropped while borrowed
   --> $DIR/handler-inside-scope.rs:21:9
    |
 20 |     scope(|scope| {
-   |            ----- has type `&irq::Scope<'1, Interrupt>`
+   |            ----- has type `&Scope<'1, Interrupt>`
 21 |         handler!(int0 = move || i += 1);
    |         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ creates a temporary which is freed while still in use
 22 |         scope.register(Interrupt::INT0, int0);
@@ -17,7 +17,7 @@ error[E0597]: `closure` does not live long enough
   --> $DIR/handler-inside-scope.rs:21:9
    |
 20 |     scope(|scope| {
-   |            ----- has type `&irq::Scope<'1, Interrupt>`
+   |            ----- has type `&Scope<'1, Interrupt>`
 21 |         handler!(int0 = move || i += 1);
    |         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
    |         |
