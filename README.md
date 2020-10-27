@@ -2,7 +2,7 @@
 
 [![crates.io](https://img.shields.io/crates/v/irq.svg)](https://crates.io/crates/irq)
 [![docs.rs](https://docs.rs/irq/badge.svg)](https://docs.rs/irq/)
-[![Build Status](https://travis-ci.org/jonas-schievink/irq.svg?branch=master)](https://travis-ci.org/jonas-schievink/irq)
+![CI](https://github.com/jonas-schievink/irq/workflows/CI/badge.svg)
 
 This crate provides utilities for handling interrupts on embedded devices.
 
@@ -67,5 +67,3 @@ fn main() {
 
 This crate targets stable Rust. No guarantees are made beyond that, so the
 minimum supported version might be bumped as needed.
-
-The MSRV is also explicitly tested against in [.travis.yml](.travis.yml).
