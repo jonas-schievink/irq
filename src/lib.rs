@@ -1,16 +1,10 @@
 //! Utilities for interrupt handling.
 //!
-//! This crate provides:
+//! This crate provides an API to register scoped interrupts, inspired by [`crossbeam::scope`].
 //!
-//! * An API to register scoped interrupts, inspired by [`crossbeam::scope`].
-//!
-//!   After registering interrupts using the [`scoped_interrupts!`] macro, the [`scope`] function
-//!   can be used to enter an "interrupt scope", in which interrupt handlers can be registered for
-//!   the duration of the scope. This allows them to make use of data defined in the calling
-//!   function.
-//!
-//! * A [`PriorityLock`] that allows sharing mutable data between interrupts at different
-//!   priorities.
+//! After registering interrupts using the [`scoped_interrupts!`] macro, the [`scope`] function can
+//! be used to enter an "interrupt scope", in which interrupt handlers can be registered for the
+//! duration of the scope. This allows them to make use of data defined in the calling function.
 //!
 //! # Examples
 //!
@@ -60,7 +54,6 @@
 //! [`crossbeam::scope`]: https://docs.rs/crossbeam/0.7.3/crossbeam/fn.scope.html
 //! [`scoped_interrupts!`]: macro.scoped_interrupts.html
 //! [`scope`]: fn.scope.html
-//! [`PriorityLock`]: struct.PriorityLock.html
 //! [svd2rust]: https://github.com/rust-embedded/svd2rust
 
 #![doc(html_root_url = "https://docs.rs/irq/0.2.3")]
@@ -69,10 +62,7 @@
 #![warn(missing_debug_implementations, rust_2018_idioms)]
 #![cfg_attr(not(test), no_std)]
 
-mod lock;
 mod readme;
-
-pub use lock::*;
 
 use core::fmt;
 use core::marker::PhantomData;
